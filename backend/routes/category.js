@@ -18,3 +18,18 @@ router.post('/add', auth.authenticateToken, admin.checkRole, (req, res, next) =>
         }
     });
 })
+
+router.get('/get', auth.authenticateToken, (req, res, next) => {
+    const category = req.body;
+    var query = "Select * from category order by name";
+    connection.query(query, (err, results) => {
+        if (!err) {
+            return res.status(200).json(results)
+        } else {
+            return res.status(500).json(err); 
+        }
+    });
+});
+
+
+module.exports = router;

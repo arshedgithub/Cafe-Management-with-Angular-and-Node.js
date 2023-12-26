@@ -20,7 +20,6 @@ router.post('/add', auth.authenticateToken, admin.checkRole, (req, res, next) =>
 })
 
 router.get('/get', auth.authenticateToken, (req, res, next) => {
-    const category = req.body;
     var query = "Select * from category order by name";
     connection.query(query, (err, results) => {
         if (!err) {
@@ -31,5 +30,19 @@ router.get('/get', auth.authenticateToken, (req, res, next) => {
     });
 });
 
+router.patch('/update', auth.authenticateToken, admin.checkRole, (req, res, next) => {
+    const category = req.body;
+    var query = "update category set name=? where id=?";
+    connection.query(query, [category.name, category.id], (err, results) => {
+        if (!err) {
+            if (results.affectedRows == 0) {
+                return res.status(404).json({ message: "category id doesn't found." })
+            }
+            return res.status(200).json({message: "category updated successfully."})
+        } else {
+            return res.status(500).json(err); 
+        }
+    });
+});
 
 module.exports = router;

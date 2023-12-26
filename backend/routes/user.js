@@ -25,5 +25,23 @@ router.post('/signup', (req, res) => {
     })
 })
 
+router.post('/login', (req,res) => {
+    const user = req.body;
+    query = "Select email, password, role, status from user where email=?";
+    connection.query(query, [user.email], (err, results) => {
+        if (!err) {
+            if (results.length <= 0 || results[0].password != user.password){
+                return res.status(401).json("Incorrect username or password")
+            } else if (results[0].status === 'false'){
+                return res.status(401).json("Wait for admin approval")
+            } else if (results[0].password == user.password){
+                // should create a jwt token
+            } else {
+                return res.status(400).json({message: 'Something went wrong. Please try again later.'})
+            }
+            return res.status(500).json(err)
+        }
+    })
+})
 
 module.exports = router;

@@ -12,7 +12,7 @@ router.post('/signup', (req, res) => {
     connection.query(query, [user.email], (err, results) => {
         if (!err) {
             if (results.length <= 0) {
-                query = "INSERT INTO user(name, contactNumber, email, password, status, role ) values(?, ?, ?, ?, 'false', 'user');"
+                query = "INSERT INTO user(name, contactNumber, email, password, status, role ) values(?, ?, ?, ?, 'true', 'user');"
                 connection.query(query, [user.name, user.contactNumber, user.email, user.password], (err, results) => {
                     if (!err) {
                         return res.status(200).json({ message: "Successfuly registered." })
@@ -52,5 +52,41 @@ router.post('/login', (req, res) => {
     })
 })
 
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
+    }
+});
+
+router.post('/forgotPassword', (req, res) => {
+    const user = req.body;
+    query = "Select email, password from user where email=?";
+    connection.query(query, [user.email], (err, results) => {
+        if (!err) {
+            if (results.length <= 0){
+                return res.status(400).json({message: "Email is not registered here."})
+            } else {
+                var emailOptions = {
+                    from: process.env.EMAIL,
+                    to: results[0].email,
+                    subject: "Password by Cafe Management System",
+                    html: `<p><b>Your login details for cafe management system</b><br>Email : ${results[0].email}<br>Password : ${results[0].password}<br><a href="http://localhost:${process.env.PORT}/user/login">click here to login</a></p>`
+                }
+
+                transporter.sendMail(emailOptions, (error, info) => {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        console.log("email sent " + info.response);
+                    }
+                });
+            }
+        } else {
+            return res.status(500).json(err);
+        }
+    })
+})
 
 module.exports = router;

@@ -19,8 +19,8 @@ router.post('/add', auth.authenticateToken, admin.checkRole, (req, res) => {
     });
 });
 
-router.get('/get', auth.authenticateToken, (req, res, next) => {
-    var query = "Select * from products";
+router.get('/get', auth.authenticateToken, (req, res) => {
+    var query = "Select p.id, p.name, p.description, p.price, p.status, c.id as categoryId, c.name as categoryName from product as p INNER JOIN category as c WHERE p.categoryId = c.id";
     connection.query(query, (err, results) => {
         if (!err){
             return res.status(200).json(results);
@@ -28,6 +28,10 @@ router.get('/get', auth.authenticateToken, (req, res, next) => {
             return res.status(500).json(err);
         }
     });
+});
+
+router.patch('/update', auth.authenticateToken, admin.checkRole, (req, res) => {
+
 });
 
 module.exports = router;

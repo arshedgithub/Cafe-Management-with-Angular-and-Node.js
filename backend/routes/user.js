@@ -27,7 +27,7 @@ router.post('/signup', (req, res) => {
             return res.status(500).json(err);
         }
     })
-})
+});
 
 router.post('/login', (req, res) => {
     const user = req.body;
@@ -50,7 +50,7 @@ router.post('/login', (req, res) => {
             return res.status(500).json(err)
         }
     })
-})
+});
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -87,7 +87,7 @@ router.post('/forgotPassword', (req, res) => {
             return res.status(500).json(err);
         }
     })
-})
+});
 
 router.get('/get', (req, res) => {
     var query = "Select id, name, email, contactNumber, status from user where role='user'";
@@ -98,5 +98,22 @@ router.get('/get', (req, res) => {
             return res.status(500).json(err)
         }
     })
-})
+});
+
+router.patch('/update', (req, res) => {
+    const user = req.body;
+    var query = "Update user set status=? where id=?"
+    connection.query(query, [user.status, user.id], (err, results) => {
+        if (!err) {
+            if (results.affectedRows == 0) {
+                return res.status(404).json({message: "User id does not exist."})
+            } else {
+                return res.status(200).json({message: "User updated successfully."})
+            }
+        } else {
+            return res.status(500).json(err)
+        }
+    })
+});
+
 module.exports = router;

@@ -6,6 +6,9 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
+const auth = require('../services/auth')
+const admin = require('../services/admin')
+
 router.post('/signup', (req, res) => {
     let user = req.body;
     query = "select email, password, role, status from user where email=?";
@@ -89,7 +92,7 @@ router.post('/forgotPassword', (req, res) => {
     })
 });
 
-router.get('/get', (req, res) => {
+router.get('/get', auth.authenticateToken, admin.checkRole, (req, res) => {
     var query = "Select id, name, email, contactNumber, status from user where role='user'";
     connection.query(query, (err, results) => {
         if (!err) {
@@ -100,7 +103,7 @@ router.get('/get', (req, res) => {
     })
 });
 
-router.patch('/update', (req, res) => {
+router.patch('/update', auth.authenticateToken, admin.checkRole, (req, res) => {
     const user = req.body;
     var query = "Update user set status=? where id=?"
     connection.query(query, [user.status, user.id], (err, results) => {
@@ -114,6 +117,37 @@ router.patch('/update', (req, res) => {
             return res.status(500).json(err)
         }
     })
+});
+
+router.get('/checkToken', auth.authenticateToken, (req,res) => {
+    res.status(200).json({message: "true"});
+});
+
+router.post('/changePassword', auth.authenticateToken, (req, res) => {
+    const user = req.body;
+    const email = res.locals.email;
+    var query = "Select * from user where email=? and password=?";
+    connection.query(query, [email, user.oldPassword], (err, results) => {
+         if (!err) {
+            if (results.length <= 0) {
+                return res.status(400).json({message: "Incorrect Old password."});
+            } else if (results[0].password == user.oldPassword) {
+                query = "Update user set password=? where email=?";
+                connection.query(query, [user.newPassword, email], (err, results) => {
+                    if (!err) {
+                        return res.status(200).json({message: "Password updated successfully."});
+                    } else {
+                        return res.status(500).json(err);
+                    }
+                });
+            } else {
+                return res.status(500).json({message: "Something went wrong."});
+            }
+            
+         } else {
+            return res.status(500).json(err);
+         }
+    });
 });
 
 module.exports = router;

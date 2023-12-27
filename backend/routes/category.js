@@ -1,6 +1,6 @@
 const express = require('express');
 const connection = require('../connection');
-const router = express.Router()
+const router = express.Router();
 
 require('dotenv').config();
 

@@ -55,7 +55,7 @@ router.get('/getById/:id', auth.authenticateToken, (req, res) => {
 });
 
 router.patch('/update', auth.authenticateToken, admin.checkRole, (req, res) => {
-    let { name, categoryId, description, price, id } = req.body;
+    const { name, categoryId, description, price, id } = req.body;
     var query = "Update product set name=?, categoryId=?, description=?, price=? where id=?";
     connection.query(query, [name, categoryId, description, price, id], (err, results) => {
         if (!err) {
@@ -82,6 +82,21 @@ router.delete('/delete/:id', auth.authenticateToken, admin.checkRole, (req, res,
             return res.status(500).json(err);
         }
     });
-})
+});
+
+router.patch('/updateStatus', auth.authenticateToken, admin.checkRole, (req, res) => {
+    const { status, id } = req.body;
+    var query = "Update product set status=? where id=?";
+    connection.query(query, [status, id], (err, results) => {
+        if (!err) {
+            if (results.affectedRows == 0){
+                return res.status(404).json({message: "Product id does not found."});
+            }
+            return res.status(200).json({message: "Status updated successfully."});
+        } else {
+            return res.status(500).json(err);
+        }
+    });
+});
 
 module.exports = router;

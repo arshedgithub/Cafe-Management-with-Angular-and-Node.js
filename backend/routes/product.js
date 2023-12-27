@@ -30,8 +30,24 @@ router.get('/get', auth.authenticateToken, (req, res) => {
     });
 });
 
-router.patch('/update', auth.authenticateToken, admin.checkRole, (req, res) => {
-
+router.get('/getByCategory/:id', auth.authenticateToken, (req, res) => {
+    var categoryId = req.params.id;
+    var query = "Select id, name, description, price from products where categoryId=? and status='true'";
+    connection.query(query,[categoryId], (err, results) => {
+        if (!err){
+            return res.status(200).json(results);
+        } else {
+            return res.status(500).json(err);
+        }
+    });
 });
+
+
+
+
+// router.patch('/update', auth.authenticateToken, admin.checkRole, (req, res) => {
+//     let product = req.body;
+//     var query = "Update product set "
+// });
 
 module.exports = router;

@@ -32,7 +32,7 @@ router.get('/get', auth.authenticateToken, (req, res) => {
 
 router.get('/getByCategory/:id', auth.authenticateToken, (req, res) => {
     var categoryId = req.params.id;
-    var query = "Select id, name, description, price from products where categoryId=? and status='true'";
+    var query = "Select id, name, description, price from product where categoryId=? and status='true'";
     connection.query(query,[categoryId], (err, results) => {
         if (!err){
             return res.status(200).json(results);
@@ -42,12 +42,46 @@ router.get('/getByCategory/:id', auth.authenticateToken, (req, res) => {
     });
 });
 
+router.get('/getById/:id', auth.authenticateToken, (req, res) => {
+    var productId = req.params.id;
+    var query = "Select id, name, description, price from product where id=?";
+    connection.query(query,[productId], (err, results) => {
+        if (!err){
+            return res.status(200).json(results[0]);
+        } else {
+            return res.status(500).json(err);
+        }
+    });
+});
 
+router.patch('/update', auth.authenticateToken, admin.checkRole, (req, res) => {
+    let { name, categoryId, description, price, id } = req.body;
+    var query = "Update product set name=?, categoryId=?, description=?, price=? where id=?";
+    connection.query(query, [name, categoryId, description, price, id], (err, results) => {
+        if (!err) {
+            if (results.affectedRows == 0){
+                return res.status(404).json({message: "Product id does not found."});
+            }
+            return res.status(200).json({message: "Product updated successfully."});
+        } else {
+            return res.status(500).json(err);
+        }
+    });
+});
 
-
-// router.patch('/update', auth.authenticateToken, admin.checkRole, (req, res) => {
-//     let product = req.body;
-//     var query = "Update product set "
-// });
+router.delete('/delete/:id', auth.authenticateToken, admin.checkRole, (req, res, next) => {
+    const id = req.params.id;
+    var query = "Delete from product where id=?";
+    connection.query(query, [id], (err, results) => {
+        if (!err) {
+            if (results.affectedRows == 0){
+                return res.status(404).json({message: "Product id does not found."});
+            }
+            return res.status(200).json({message: "Product updated successfully."});
+        } else {
+            return res.status(500).json(err);
+        }
+    });
+})
 
 module.exports = router;

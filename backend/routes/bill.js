@@ -8,7 +8,6 @@ let pdf = require('html-pdf');
 let path = require('path');
 let uuid = require('uuid');
 const { authenticateToken } = require('../services/auth');
-const { checkRole } = require('../services/admin');
 
 router.post('/generateReport', authenticateToken, (req, res) => {
     const generatedUuid = uuid.v1();
